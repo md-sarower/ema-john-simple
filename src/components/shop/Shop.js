@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { addToDb } from '../../utilities/fakedb';
+import { addToDb, getStoredCard } from '../../utilities/fakedb';
 import Cart from '../cart/Cart';
 import Products from '../products/Products';
 import './Shop.css';
@@ -12,14 +12,38 @@ const Shop = () => {
         fetch('products.json')
             .then(res => res.json())
             .then(data => setProducts(data))
-    }, [])
+    }, []);
 
-    const handleAddToCart = (product) => {
-        // console.log(product);
-        // Do not do this:   cart.push(product);
-        const newCart = [...cart, product];
+    useEffect( () => {
+        const storedCart = getStoredCard();
+        const saveCart = []; 
+        for(const id in storedCart) {
+            const addedProduct = products.find(product => product.id === id);
+            if(addedProduct){
+                const quantity = storedCart[id];
+                addedProduct.quantity = quantity;
+                saveCart.push(addedProduct);
+            }
+        }
+        setCart(saveCart); 
+    }, [products])
+
+    const handleAddToCart = (selectedProduct) => {
+        console.log(selectedProduct);
+        let newCart = [];
+        const exists = cart.find(product => product.id === selectedProduct.id);
+        if(!exists){
+            selectedProduct.quantity = 1;
+            newCart = [...cart, selectedProduct];
+        }
+        else{
+            const rest = cart.filter(product => product.id !== selectedProduct.id);
+            exists.quantity = exists.quantity + 1; 
+            newCart = [...rest, exists];
+        }
+        console.log(newCart);
         setCart(newCart);
-        addToDb(product.id);
+        addToDb(selectedProduct.id);
     }
 
     return (
