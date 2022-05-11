@@ -23,6 +23,7 @@ const Shipment = () => {
 
     const handleCreateUser = event => {
         event.preventDefault();
+        const shippingInfo = { name, email, address, phone };
     }
 
 
